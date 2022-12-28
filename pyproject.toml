@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "youtube_uploader"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+google-auth-oauthlib = "^0.8.0"
+google-auth = "^2.15.0"
+google-api-python-client = "^2.70.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.12.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+youtube_uploader = "youtube_uploader.main:main"
