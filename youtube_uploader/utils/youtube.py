@@ -26,9 +26,6 @@ MISSING_CLIENT_SECRETS_MESSAGE = ""
 
 PLAYLIST_MAX_RESULTS = 50
 
-logging.basicConfig()
-logging.getLogger().setLevel(logging.ERROR)
-
 
 def get_authenticated_service():
     credentials = _get_user_credentials()
@@ -48,7 +45,7 @@ def _get_user_credentials():
 
 
 def upload_video(service, name, file_path):
-    print("Uploading Video...")
+    logging.debug("Uploading Video...")
     try:
         upload_response = (
             service.videos()
@@ -70,7 +67,7 @@ def upload_video(service, name, file_path):
 
 
 def insert_video_into_playlist(service, video_id, playlist_id):
-    print(f"Inserting video {video_id} into playlist {playlist_id}")
+    logging.debug(f"Inserting video {video_id} into playlist {playlist_id}")
     try:
         service.playlistItems().insert(
             part="snippet",
@@ -96,10 +93,10 @@ def get_playlist_id_from_date(service, video_date: datetime):
         if playlist["snippet"]["title"] == playlist_name
     ]
     if playlist_id_to_upload:
-        print(f"Found existing playlist '{playlist_name}'")
+        logging.debug(f"Found existing playlist '{playlist_name}'")
         return playlist_id_to_upload[0]
 
-    print("Creating playlist...")
+    logging.debug("Creating playlist '{playlist_name}'...")
     try:
         playlist_response = (
             service.playlists()

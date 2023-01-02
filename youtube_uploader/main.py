@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import logging
 import os
 import os.path
 import time
@@ -16,6 +17,14 @@ CLIENT_SECRET_FILE = "client_secret_252723081857-nr72rralklriqt6mh3d1d5idm1kbh8a
 UPLOAD_DIRECTORY = r"C:\Users\Ilgoo\Videos\Bouldering"
 PHOTO_DATETIME_FORMAT = "%Y%m%d_%H%M%S"
 
+logging.basicConfig(filename="youtube_uploader_logs.log",
+                    filemode='a',
+                    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
+
+logging.getLogger().setLevel(logging.DEBUG)
+
 
 def upload_videos(service):
     video_files = []
@@ -27,7 +36,7 @@ def upload_videos(service):
         file_path = f"{UPLOAD_DIRECTORY}/{file}"
         video_id = upload_video(service, file[:-4].replace("_", " "), file_path)
 
-        print(f"Deleting {file_path}...")
+        logging.debug(f"Deleting {file_path}...")
         os.remove(file_path)
 
         video_date = datetime.strptime(file[:-4], PHOTO_DATETIME_FORMAT)
