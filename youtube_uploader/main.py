@@ -20,7 +20,6 @@ PHOTO_DATETIME_FORMAT = "%Y%m%d_%H%M%S"
 logging.basicConfig(filename="youtube_uploader_logs.log",
                     filemode='a',
                     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                    datefmt='%H:%M:%S',
                     level=logging.DEBUG)
 
 logging.getLogger().setLevel(logging.DEBUG)
