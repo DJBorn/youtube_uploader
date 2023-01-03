@@ -96,7 +96,7 @@ def get_playlist_id_from_date(service, video_date: datetime):
         logging.debug(f"Found existing playlist '{playlist_name}'")
         return playlist_id_to_upload[0]
 
-    logging.debug("Creating playlist '{playlist_name}'...")
+    logging.debug(f"Creating playlist '{playlist_name}'")
     try:
         playlist_response = (
             service.playlists()
