@@ -10,11 +10,6 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
-CLIENT_SECRET_FILE = "client_secret_252723081857-nr72rralklriqt6mh3d1d5idm1kbh8a9.apps.googleusercontent.com.json"
-
-# client_secret_252723081857-nr72rralklriqt6mh3d1d5idm1kbh8a9.apps.googleusercontent.com.json
-# client_secret_551581634693-mrsqtg54795liv2e5djvaph46c10fbvu.apps.googleusercontent.com.json
-
 YOUTUBE_UPLOAD_SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtubepartner-channel-audit",
@@ -27,60 +22,61 @@ MISSING_CLIENT_SECRETS_MESSAGE = ""
 PLAYLIST_MAX_RESULTS = 50
 
 
-def get_authenticated_service():
-    credentials = _get_user_credentials()
+def get_authenticated_service(client_secret_file):
+    credentials = _get_user_credentials(client_secret_file)
     return build(YOUTUBE_API_SERVICE_NAME, YOUTUBE_API_VERSION, credentials=credentials)
 
 
-def _get_user_credentials():
-    if os.path.isfile("credentials.json"):
-        return Credentials.from_authorized_user_file("credentials.json")
+def _get_user_credentials(client_secret_file):
+    credential_id = client_secret_file.split("-")[0].split("_")[-1]
+    credentials_json = f"credentials_{credential_id}.json"
+    if os.path.isfile(credentials_json):
+        return Credentials.from_authorized_user_file(credentials_json)
     flow = InstalledAppFlow.from_client_secrets_file(
-        CLIENT_SECRET_FILE, YOUTUBE_UPLOAD_SCOPES
+        client_secret_file, YOUTUBE_UPLOAD_SCOPES
     )
     credentials = flow.run_local_server()
-    with open("credentials.json", "w") as file:
+    with open(credentials_json, "w") as file:
         json.dump(json.loads(credentials.to_json()), file)
     return credentials
 
 
+def delete_credentials(client_secret_file):
+    credential_id = client_secret_file.split("-")[0].split("_")[-1]
+    credentials_json = f"credentials_{credential_id}.json"
+    os.remove(credentials_json)
+
+
 def upload_video(service, name, file_path):
     logging.debug("Uploading Video...")
-    try:
-        upload_response = (
-            service.videos()
-            .insert(
-                part="snippet,status",
-                body={
-                    "snippet": {"categoryId": "17", "description": "", "title": name},
-                    "status": {"privacyStatus": "public"},
-                },
-                media_body=MediaFileUpload(file_path),
-            )
-            .execute()
+
+    upload_response = (
+        service.videos()
+        .insert(
+            part="snippet,status",
+            body={
+                "snippet": {"categoryId": "17", "description": "", "title": name},
+                "status": {"privacyStatus": "public"},
+            },
+            media_body=MediaFileUpload(file_path),
         )
-    except HttpError as e:
-        logging.error(e.reason)
-        exit()
+        .execute()
+    )
 
     return upload_response["id"]
 
 
 def insert_video_into_playlist(service, video_id, playlist_id):
     logging.debug(f"Inserting video {video_id} into playlist {playlist_id}")
-    try:
-        service.playlistItems().insert(
-            part="snippet",
-            body={
-                "snippet": {
-                    "playlistId": playlist_id,
-                    "resourceId": {"kind": "youtube#video", "videoId": video_id},
-                }
-            },
-        ).execute()
-    except HttpError as e:
-        logging.error(e.reason)
-        exit()
+    service.playlistItems().insert(
+        part="snippet",
+        body={
+            "snippet": {
+                "playlistId": playlist_id,
+                "resourceId": {"kind": "youtube#video", "videoId": video_id},
+            }
+        },
+    ).execute()
 
 
 def get_playlist_id_from_date(service, video_date: datetime):
